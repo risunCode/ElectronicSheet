@@ -117,7 +117,7 @@
                 
                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
                     <!-- Editor -->
-                    <div class="lg:col-span-3 bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="lg:col-span-3 bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg relative">
                         <div class="p-6">
                             <!-- TinyMCE Editor -->
                             <div class="mb-4">
@@ -149,34 +149,30 @@
                                 </div>
                             </div>
                         </div>
+                        
+                        <!-- Floating Save Buttons -->
+                        <div class="absolute top-4 right-4 flex gap-2 z-10">
+                            <x-primary-button class="text-sm py-2 px-4">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                                Save
+                            </x-primary-button>
+                            <a href="{{ route('documents.index') }}" class="inline-flex justify-center items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-transparent rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-gray-600">
+                                Cancel
+                            </a>
+                        </div>
                     </div>
 
                     <!-- Sidebar -->
-                    <div class="space-y-6">
-                        <!-- Save Actions -->
+                    <div class="space-y-4 max-h-screen overflow-y-auto pb-20">
+                        <!-- Export & Status -->
                         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                             <div class="p-4">
-                                <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Aksi</h3>
-                                <div class="space-y-2">
-                                    <x-primary-button class="w-full justify-center text-sm py-2">
-                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
-                                        Simpan
-                                    </x-primary-button>
-                                    <a href="{{ route('documents.index') }}" class="w-full inline-flex justify-center items-center px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-transparent rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest hover:bg-gray-200 dark:hover:bg-gray-600">
-                                        Batal
-                                    </a>
-                                </div>
-                                
-                                <!-- Export Options -->
-                                <div class="mt-3 pt-2 border-t border-gray-200 dark:border-gray-600">
-                                    <button onclick="exportToDocx()" class="w-full px-3 py-2 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 flex items-center justify-center gap-2">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                        Export to DOCX
-                                    </button>
-                                </div>
-                                
-                                <div class="mt-3 pt-2 border-t border-gray-200 dark:border-gray-600">
-                                    <span id="autosave-status" class="text-xs text-green-500">Tersimpan otomatis</span>
+                                <button onclick="exportToDocx()" class="w-full px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 flex items-center justify-center gap-2 mb-3">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                    Export DOCX
+                                </button>
+                                <div class="text-center">
+                                    <span id="autosave-status" class="text-xs text-green-500">Auto-saved</span>
                                 </div>
                             </div>
                         </div>
@@ -322,7 +318,7 @@
 
     <!-- AI Knowledge Base Modal -->
     <div id="aiKnowledgeModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white dark:bg-gray-800 rounded-lg w-full max-w-6xl h-5/6 flex flex-col">
+        <div class="bg-white dark:bg-gray-800 rounded-lg w-full max-w-4xl h-4/5 flex flex-col m-4">
             <!-- Modal Header -->
             <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">AI Knowledge Base</h3>
@@ -407,10 +403,33 @@
             <!-- Modal Body -->
             <div class="flex-1 overflow-y-auto p-4">
                 <div id="aiThinkingContent" class="space-y-3">
+                    <!-- Progress Steps -->
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                            <div id="step-1" class="w-3 h-3 rounded-full bg-blue-500"></div>
+                            <span class="text-xs text-gray-600 dark:text-gray-400">User Prompt</span>
+                        </div>
+                        <div class="flex-1 h-0.5 bg-gray-200 dark:bg-gray-600 mx-2"></div>
+                        <div class="flex items-center gap-2">
+                            <div id="step-2" class="w-3 h-3 rounded-full bg-gray-300"></div>
+                            <span class="text-xs text-gray-600 dark:text-gray-400">Reading Knowledge</span>
+                        </div>
+                        <div class="flex-1 h-0.5 bg-gray-200 dark:bg-gray-600 mx-2"></div>
+                        <div class="flex items-center gap-2">
+                            <div id="step-3" class="w-3 h-3 rounded-full bg-gray-300"></div>
+                            <span class="text-xs text-gray-600 dark:text-gray-400">AI Processing</span>
+                        </div>
+                        <div class="flex-1 h-0.5 bg-gray-200 dark:bg-gray-600 mx-2"></div>
+                        <div class="flex items-center gap-2">
+                            <div id="step-4" class="w-3 h-3 rounded-full bg-gray-300"></div>
+                            <span class="text-xs text-gray-600 dark:text-gray-400">Response</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Thinking Log -->
                     <div class="text-sm text-gray-600 dark:text-gray-400">
-                        <p class="mb-2">🤔 Sedang berpikir...</p>
-                        <div class="bg-gray-100 dark:bg-gray-700 rounded p-3 font-mono text-xs leading-relaxed whitespace-pre-wrap" id="thinkingText">
-                            Memproses prompt Anda...
+                        <div class="bg-gray-100 dark:bg-gray-700 rounded p-3 font-mono text-xs leading-relaxed whitespace-pre-wrap max-h-64 overflow-y-auto" id="thinkingText">
+                            🤖 Starting AI processing...
                         </div>
                     </div>
                 </div>
@@ -964,18 +983,53 @@
         // AI Modal Functions
         function openAIModal() {
             document.getElementById('aiThinkingModal').classList.remove('hidden');
-            document.getElementById('thinkingText').textContent = 'Memproses prompt Anda...';
+            document.getElementById('thinkingText').textContent = '🤖 Starting AI processing...';
+            resetThinkingSteps();
         }
 
         function closeAIModal() {
             document.getElementById('aiThinkingModal').classList.add('hidden');
         }
 
+        function resetThinkingSteps() {
+            // Reset all steps to inactive
+            for (let i = 1; i <= 4; i++) {
+                const step = document.getElementById(`step-${i}`);
+                step.classList.remove('bg-blue-500', 'bg-green-500', 'animate-pulse');
+                step.classList.add('bg-gray-300');
+            }
+            // Activate first step
+            document.getElementById('step-1').classList.remove('bg-gray-300');
+            document.getElementById('step-1').classList.add('bg-blue-500', 'animate-pulse');
+        }
+
+        function activateStep(stepNumber) {
+            // Deactivate previous steps animation
+            for (let i = 1; i < stepNumber; i++) {
+                const step = document.getElementById(`step-${i}`);
+                step.classList.remove('animate-pulse', 'bg-blue-500');
+                step.classList.add('bg-green-500');
+            }
+            
+            // Activate current step
+            if (stepNumber <= 4) {
+                const step = document.getElementById(`step-${stepNumber}`);
+                step.classList.remove('bg-gray-300');
+                step.classList.add('bg-blue-500', 'animate-pulse');
+            }
+        }
+
+        function completeStep(stepNumber) {
+            const step = document.getElementById(`step-${stepNumber}`);
+            step.classList.remove('animate-pulse', 'bg-blue-500');
+            step.classList.add('bg-green-500');
+        }
+
         function updateThinkingText(text) {
             const thinkingEl = document.getElementById('thinkingText');
             thinkingEl.textContent += text;
             // Auto scroll to bottom
-            thinkingEl.parentElement.parentElement.scrollTop = thinkingEl.parentElement.parentElement.scrollHeight;
+            thinkingEl.parentElement.scrollTop = thinkingEl.parentElement.scrollHeight;
         }
 
         async function callAI(action, content, isContextual = false) {
@@ -995,6 +1049,27 @@
             let thinkingLog = '';
 
             try {
+                // Step 1: User Prompt (already active)
+                await new Promise(r => setTimeout(r, 500));
+                updateThinkingText(`📝 Received ${action} request\n`);
+                completeStep(1);
+                
+                // Step 2: Reading Knowledge Base
+                activateStep(2);
+                await new Promise(r => setTimeout(r, 500));
+                const knowledgeContext = getKnowledgeContext();
+                if (knowledgeContext) {
+                    updateThinkingText(`📚 Loading ${knowledgeBase.length} knowledge entries\n`);
+                } else {
+                    updateThinkingText(`📚 No knowledge base entries found\n`);
+                }
+                completeStep(2);
+                
+                // Step 3: AI Processing
+                activateStep(3);
+                await new Promise(r => setTimeout(r, 300));
+                updateThinkingText(`🤖 Processing with ${getSelectedModel()}\n`);
+                
                 const response = await fetch('/api/ai/generate', {
                     method: 'POST',
                     headers: {
@@ -1004,37 +1079,18 @@
                     },
                     body: JSON.stringify({ 
                         action, 
-                        content: content + getKnowledgeContext(),
+                        content: content + knowledgeContext,
                         model: getSelectedModel(),
                         maxTokens: getMaxTokens()
                     })
                 });
-
-                // Simulate thinking process
-                const actionText = {
-                    'write': 'Menulis konten baru...',
-                    'continue': 'Melanjutkan penulisan...',
-                    'improve': 'Memperbaiki teks...',
-                    'summarize': 'Merangkum konten...',
-                    'translate': 'Menerjemahkan teks...',
-                    'expand': 'Memperluas teks...'
-                };
-
-                thinkingLog = `[${new Date().toLocaleTimeString()}] ${actionText[action]}\n`;
-                updateThinkingText(thinkingLog);
-
-                // Simulate thinking steps
-                const steps = [
-                    'Menganalisis konteks...\n',
-                    'Memproses dengan model ' + getSelectedModel() + '...\n',
-                    'Menghasilkan respons...\n',
-                    'Memvalidasi hasil...\n'
-                ];
-
-                for (let step of steps) {
-                    await new Promise(r => setTimeout(r, 300));
-                    updateThinkingText(step);
-                }
+                
+                updateThinkingText(`⚡ Gemini API call completed\n`);
+                completeStep(3);
+                
+                // Step 4: Response
+                activateStep(4);
+                await new Promise(r => setTimeout(r, 300));
 
                 const data = await response.json();
                 
@@ -1042,7 +1098,9 @@
                     throw new Error(data.error || 'AI request failed');
                 }
                 
-                updateThinkingText(`\n✅ Selesai! Hasil:\n${data.result.substring(0, 200)}...\n`);
+                updateThinkingText(`✅ Generated ${data.result.length} characters\n`);
+                updateThinkingText(`📄 Applying to document...\n`);
+                completeStep(4);
 
                 // Wait 1 second before inserting
                 await new Promise(r => setTimeout(r, 1000));
