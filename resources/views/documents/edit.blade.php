@@ -191,7 +191,7 @@
                                         </svg>
                                         AI Assistant
                                     </h3>
-                                    <button onclick="openKnowledgeModal()" class="text-xs text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300" title="AI Knowledge Base">
+                                    <button type="button" onclick="openKnowledgeModal()" class="text-xs text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300" title="AI Knowledge Base">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C20.832 18.477 19.246 18 17.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                                         </svg>
@@ -327,10 +327,10 @@
             <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">AI Knowledge Base</h3>
                 <div class="flex gap-2">
-                    <button onclick="addKnowledge()" class="px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">
+                    <button type="button" onclick="addKnowledge()" class="px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">
                         + Add Knowledge
                     </button>
-                    <button onclick="closeKnowledgeModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <button type="button" onclick="closeKnowledgeModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
@@ -363,10 +363,10 @@
                                 <textarea id="knowledgeContent" rows="15" class="w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md" placeholder="Enter your custom AI instructions, context, or knowledge here..."></textarea>
                             </div>
                             <div class="flex gap-2">
-                                <button onclick="saveKnowledge()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                                <button type="button" onclick="saveKnowledge()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
                                     Save
                                 </button>
-                                <button onclick="deleteKnowledge()" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                                <button type="button" onclick="deleteKnowledge()" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
                                     Delete
                                 </button>
                             </div>
@@ -397,7 +397,7 @@
                     </svg>
                     AI Thinking...
                 </h3>
-                <button onclick="closeAIModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <button type="button" onclick="closeAIModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -418,7 +418,7 @@
             
             <!-- Modal Footer -->
             <div class="border-t border-gray-200 dark:border-gray-700 p-4 flex justify-end gap-2">
-                <button onclick="closeAIModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200">
+                <button type="button" onclick="closeAIModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200">
                     Tutup
                 </button>
             </div>
