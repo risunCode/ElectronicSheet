@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import Swal from "sweetalert2";
 import AIModal from "@/components/AIModal";
 import CustomInstructionModal from "@/components/CustomInstructionModal";
+import { HybridStorage } from "@/lib/hybridStorage";
 
 // Dynamic import for TinyMCE to avoid SSR issues
 const Editor = dynamic(() => import("@tinymce/tinymce-react").then((mod) => mod.Editor), {
@@ -18,8 +19,7 @@ const Editor = dynamic(() => import("@tinymce/tinymce-react").then((mod) => mod.
 });
 
 interface Document {
-  id: number;
-  uuid: string;
+  id: string;
   title: string;
   description: string | null;
   type: string;
@@ -28,6 +28,8 @@ interface Document {
   pageSize: string;
   pageOrientation: string;
   wordCount: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface TokenUsage {
@@ -87,10 +89,25 @@ export default function DocumentEditorPage({ params }: { params: Promise<{ id: s
 
   async function fetchDocument() {
     try {
-      const res = await fetch(`/api/documents/${id}`);
-      if (!res.ok) throw new Error("Not found");
-      const data = await res.json();
-      setDocument(data);
+      const doc = await HybridStorage.getDocument(id);
+      if (!doc) throw new Error("Not found");
+      
+      // Convert to Document interface format
+      const documentData: Document = {
+        id: doc.id.toString(),
+        title: doc.title,
+        description: doc.description || null,
+        type: doc.type || "docx",
+        status: doc.status,
+        content: doc.content || null,
+        pageSize: "a4",
+        pageOrientation: "portrait",
+        wordCount: doc.content ? doc.content.replace(/<[^>]*>/g, "").split(/\s+/).filter(Boolean).length : 0,
+        createdAt: doc.createdAt instanceof Date ? doc.createdAt.toISOString() : doc.createdAt,
+        updatedAt: doc.updatedAt instanceof Date ? doc.updatedAt.toISOString() : doc.updatedAt,
+      };
+      
+      setDocument(documentData);
     } catch (error) {
       console.error("Failed to fetch document:", error);
       await Swal.fire({
@@ -129,20 +146,23 @@ export default function DocumentEditorPage({ params }: { params: Promise<{ id: s
       // @ts-expect-error TinyMCE ref type
       const content = editorRef.current.getContent();
       
-      const res = await fetch(`/api/documents/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: document.title,
-          description: document.description,
-          content,
-          status: document.status,
-          pageSize: document.pageSize,
-          pageOrientation: document.pageOrientation,
-        }),
+      const updatedDoc = await HybridStorage.updateDocument(id, {
+        title: document.title,
+        description: document.description,
+        content,
+        status: document.status,
       });
 
-      if (!res.ok) throw new Error("Failed to save");
+      if (!updatedDoc) throw new Error("Failed to save");
+
+      // Update local state with new word count
+      const wordCount = content ? content.replace(/<[^>]*>/g, "").split(/\s+/).filter(Boolean).length : 0;
+      setDocument({
+        ...document,
+        content,
+        wordCount,
+        updatedAt: new Date().toISOString(),
+      });
 
       await Swal.fire({
         icon: "success",

@@ -20,6 +20,20 @@ export class HybridStorage {
     return DocumentManager.getDocuments();
   }
 
+  static async getDocument(id: string) {
+    if (USE_DATABASE && prisma) {
+      try {
+        return await prisma.document.findUnique({
+          where: { id: parseInt(id) },
+          include: { template: true },
+        });
+      } catch {
+        return DocumentManager.getDocument(id);
+      }
+    }
+    return DocumentManager.getDocument(id);
+  }
+
   static async createDocument(data: {
     title: string;
     content?: string;

@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
+import { HybridStorage } from "@/lib/hybridStorage";
+import { storage } from "@/lib/storage";
 
 interface Settings {
   gemini_api_key: string;
@@ -26,13 +28,25 @@ export default function SettingsPage() {
 
   async function fetchSettings() {
     try {
-      const res = await fetch("/api/settings");
-      const data = await res.json();
-      const savedModel = data.last_model || "gemini-2.5-flash";
+      // Try HybridStorage first (database mode)
+      const data = await HybridStorage.getSettings();
+      
+      // Fallback to LocalStorage for client-side persistence
+      const localSettings = storage.getSettings();
+      
+      // Merge both, with LocalStorage taking priority
+      const mergedSettings = {
+        gemini_api_key: localSettings.gemini_api_key || data.gemini_api_key || "",
+        tinymce_api_key: localSettings.tinymce_api_key || data.tinymce_api_key || "",
+        last_model: localSettings.last_model || data.last_model || "gemini-2.5-flash",
+      };
+      
+      const savedModel = mergedSettings.last_model;
       const presetModels = ["gemini-flash-latest", "gemini-2.0-flash", "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.5-pro", "gemini-3-pro-preview"];
+      
       setSettings({
-        gemini_api_key: data.gemini_api_key || "",
-        tinymce_api_key: data.tinymce_api_key || "",
+        gemini_api_key: mergedSettings.gemini_api_key,
+        tinymce_api_key: mergedSettings.tinymce_api_key,
         last_model: presetModels.includes(savedModel) ? savedModel : "custom",
         custom_model: presetModels.includes(savedModel) ? "" : savedModel,
       });
@@ -46,13 +60,11 @@ export default function SettingsPage() {
   async function saveSetting(key: string, value: string) {
     setSaving(true);
     try {
-      const res = await fetch("/api/settings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ key, value }),
-      });
-
-      if (!res.ok) throw new Error("Failed to save");
+      // Save to LocalStorage for persistence
+      storage.saveSetting(key, value);
+      
+      // Also try to save to HybridStorage (database mode)
+      await HybridStorage.saveSetting(key, value);
 
       await Swal.fire({
         icon: "success",
@@ -76,22 +88,16 @@ export default function SettingsPage() {
   async function handleSaveAll() {
     setSaving(true);
     try {
+      // Save all settings to LocalStorage for persistence
+      storage.saveSetting("gemini_api_key", settings.gemini_api_key);
+      storage.saveSetting("tinymce_api_key", settings.tinymce_api_key);
+      storage.saveSetting("last_model", settings.last_model === "custom" ? settings.custom_model : settings.last_model);
+      
+      // Also try to save to HybridStorage (database mode)
       await Promise.all([
-        fetch("/api/settings", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ key: "gemini_api_key", value: settings.gemini_api_key }),
-        }),
-        fetch("/api/settings", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ key: "tinymce_api_key", value: settings.tinymce_api_key }),
-        }),
-        fetch("/api/settings", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ key: "last_model", value: settings.last_model === "custom" ? settings.custom_model : settings.last_model }),
-        }),
+        HybridStorage.saveSetting("gemini_api_key", settings.gemini_api_key),
+        HybridStorage.saveSetting("tinymce_api_key", settings.tinymce_api_key),
+        HybridStorage.saveSetting("last_model", settings.last_model === "custom" ? settings.custom_model : settings.last_model),
       ]);
 
       await Swal.fire({
