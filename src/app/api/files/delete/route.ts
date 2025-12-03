@@ -30,9 +30,11 @@ export async function DELETE(request: Request) {
         }
 
         // Remove from database
-        await prisma.file.deleteMany({
-          where: { path: filePath },
-        });
+        if (prisma) {
+          await prisma.file.deleteMany({
+            where: { path: filePath },
+          });
+        }
 
         deleted.push(filePath);
       }

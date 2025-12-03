@@ -3,6 +3,17 @@ import prisma from "@/lib/prisma";
 
 export async function GET() {
   try {
+    if (!prisma) {
+      return NextResponse.json({
+        totalDocuments: 0,
+        draftCount: 0,
+        inProgressCount: 0,
+        completedCount: 0,
+        totalFiles: 0,
+        recentDocuments: [],
+      });
+    }
+
     const [
       totalDocuments,
       draftCount,

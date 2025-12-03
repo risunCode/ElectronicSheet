@@ -3,7 +3,11 @@ import prisma from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const settings = await prisma.setting.findMany();
+    let settings: any[] = [];
+    if (prisma) {
+      settings = await prisma.setting.findMany();
+    }
+    
     const result: Record<string, string> = {};
 
     // Start with env defaults
@@ -31,6 +35,10 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    if (!prisma) {
+      return NextResponse.json({ error: "Database not available" }, { status: 503 });
+    }
+
     const body = await request.json();
     const { key, value } = body;
 

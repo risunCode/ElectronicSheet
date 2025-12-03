@@ -59,10 +59,12 @@ export async function GET(request: Request) {
         });
 
         // Update last accessed in database
-        await prisma.file.updateMany({
-          where: { path: relativePath },
-          data: { lastAccessedAt: new Date() },
-        });
+        if (prisma) {
+          await prisma.file.updateMany({
+            where: { path: relativePath },
+            data: { lastAccessedAt: new Date() },
+          });
+        }
       }
     }
 
@@ -128,17 +130,19 @@ export async function POST(request: Request) {
       const relativePath = currentPath ? `${currentPath}/${filename}` : filename;
       
       // Save to database
-      await prisma.file.create({
-        data: {
-          name: filename,
-          originalName: file.name,
-          extension: path.extname(filename).slice(1).toLowerCase(),
-          mimeType: file.type || "application/octet-stream",
-          size: file.size,
-          path: relativePath,
-          disk: "local",
-        },
-      });
+      if (prisma) {
+        await prisma.file.create({
+          data: {
+            name: filename,
+            originalName: file.name,
+            extension: path.extname(filename).slice(1).toLowerCase(),
+            mimeType: file.type || "application/octet-stream",
+            size: file.size,
+            path: relativePath,
+            disk: "local",
+          },
+        });
+      }
 
       uploaded.push({
         name: filename,

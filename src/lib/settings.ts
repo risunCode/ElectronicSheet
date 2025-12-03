@@ -15,12 +15,14 @@ const ENV_MAPPING: Record<string, string> = {
 
 export async function getSetting(key: SettingKey): Promise<string | null> {
   // First try database
-  const dbSetting = await prisma.setting.findUnique({
-    where: { key },
-  });
+  if (prisma) {
+    const dbSetting = await prisma.setting.findUnique({
+      where: { key },
+    });
 
-  if (dbSetting?.value) {
-    return dbSetting.value;
+    if (dbSetting?.value) {
+      return dbSetting.value;
+    }
   }
 
   // Fallback to environment variable
@@ -33,15 +35,21 @@ export async function getSetting(key: SettingKey): Promise<string | null> {
 }
 
 export async function setSetting(key: SettingKey, value: string): Promise<void> {
-  await prisma.setting.upsert({
-    where: { key },
-    update: { value },
-    create: { key, value },
-  });
+  if (prisma) {
+    await prisma.setting.upsert({
+      where: { key },
+      update: { value },
+      create: { key, value },
+    });
+  }
 }
 
 export async function getAllSettings(): Promise<Record<string, string>> {
-  const settings = await prisma.setting.findMany();
+  let settings: any[] = [];
+  if (prisma) {
+    settings = await prisma.setting.findMany();
+  }
+  
   const result: Record<string, string> = {};
 
   // Start with env defaults

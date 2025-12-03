@@ -3,6 +3,10 @@ import prisma from "@/lib/prisma";
 
 export async function GET() {
   try {
+    if (!prisma) {
+      return NextResponse.json([]);
+    }
+
     const templates = await prisma.template.findMany({
       where: { isActive: true },
       orderBy: { name: "asc" },

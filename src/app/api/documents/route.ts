@@ -3,6 +3,11 @@ import prisma from "@/lib/prisma";
 
 export async function GET() {
   try {
+    if (!prisma) {
+      // Return empty array when no database is available
+      return NextResponse.json([]);
+    }
+
     const documents = await prisma.document.findMany({
       include: { template: true },
       orderBy: { updatedAt: "desc" },
@@ -16,6 +21,10 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    if (!prisma) {
+      return NextResponse.json({ error: "Database not available" }, { status: 503 });
+    }
+
     const body = await request.json();
     const { title, description, type, templateId, storagePath, pageSize, pageOrientation } = body;
 

@@ -5,13 +5,14 @@
   "scripts": {
     "dev": "next dev",
     "dev:light": "cross-env NEXT_TELEMETRY_DISABLED=1 next dev --no-lint --no-type-check --no-version-check",
-    "build": "prisma generate && next build",
+    "build": "npm run build:check-db && next build",
     "start": "next start",
     "lint": "eslint",
     "db:migrate": "prisma migrate dev",
     "db:seed": "npx tsx prisma/seed.ts",
     "db:reset": "prisma migrate reset",
-    "postinstall": "prisma generate"
+    "build:check-db": "node -e \"if (process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('file:./dev.db')) { require('child_process').execSync('prisma generate', { stdio: 'inherit' }) } else { console.log('Skipping Prisma generate - no database configured') }\"",
+    "postinstall": "npm run build:check-db"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.1.0",

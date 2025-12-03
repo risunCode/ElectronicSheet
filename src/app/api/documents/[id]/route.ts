@@ -6,6 +6,10 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (!prisma) {
+      return NextResponse.json({ error: "Database not available" }, { status: 503 });
+    }
+
     const { id } = await params;
     const document = await prisma.document.findUnique({
       where: { id: parseInt(id) },
@@ -28,6 +32,10 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (!prisma) {
+      return NextResponse.json({ error: "Database not available" }, { status: 503 });
+    }
+
     const { id } = await params;
     const body = await request.json();
     const { title, description, content, status, pageSize, pageOrientation } = body;
@@ -62,6 +70,10 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (!prisma) {
+      return NextResponse.json({ error: "Database not available" }, { status: 503 });
+    }
+
     const { id } = await params;
     await prisma.document.delete({
       where: { id: parseInt(id) },

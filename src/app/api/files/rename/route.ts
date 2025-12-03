@@ -31,14 +31,16 @@ export async function PUT(request: Request) {
     await rename(fullOldPath, fullNewPath);
 
     // Update database
-    const newRelativePath = oldPath.replace(path.basename(oldPath), sanitizedName);
-    await prisma.file.updateMany({
-      where: { path: oldPath },
-      data: { 
-        name: sanitizedName,
-        path: newRelativePath,
-      },
-    });
+    if (prisma) {
+      const newRelativePath = oldPath.replace(path.basename(oldPath), sanitizedName);
+      await prisma.file.updateMany({
+        where: { path: oldPath },
+        data: { 
+          name: sanitizedName,
+          path: newRelativePath,
+        },
+      });
+    }
 
     return NextResponse.json({ success: true, message: "Renamed successfully" });
   } catch (error) {

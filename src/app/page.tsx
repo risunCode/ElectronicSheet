@@ -2,6 +2,18 @@ import prisma from "@/lib/prisma";
 import DashboardClient from "@/components/DashboardClient";
 
 async function getStats() {
+  // Check if database is available
+  if (!prisma) {
+    return {
+      totalDocuments: 0,
+      draftCount: 0,
+      inProgressCount: 0,
+      completedCount: 0,
+      totalFiles: 0,
+      recentDocuments: [],
+    };
+  }
+
   const [totalDocuments, draftCount, inProgressCount, completedCount, totalFiles, recentDocuments] = 
     await Promise.all([
       prisma.document.count(),
