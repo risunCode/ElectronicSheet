@@ -7,6 +7,7 @@ import Swal from "sweetalert2";
 import AIModal from "@/components/AIModal";
 import CustomInstructionModal from "@/components/CustomInstructionModal";
 import { HybridStorage } from "@/lib/hybridStorage";
+import { storage } from "@/lib/storage";
 
 // Dynamic import for TinyMCE to avoid SSR issues
 const Editor = dynamic(() => import("@tinymce/tinymce-react").then((mod) => mod.Editor), {
@@ -123,10 +124,21 @@ export default function DocumentEditorPage({ params }: { params: Promise<{ id: s
 
   async function fetchSettings() {
     try {
-      const res = await fetch("/api/settings");
-      const data = await res.json();
-      setTinymceKey(data.tinymce_api_key || "");
-      const savedModel = data.last_model || "gemini-2.5-flash";
+      // Try HybridStorage first (database mode)
+      const data = await HybridStorage.getSettings();
+      
+      // Fallback to LocalStorage for client-side persistence
+      const localSettings = storage.getSettings();
+      
+      // Merge both, with LocalStorage taking priority
+      const mergedSettings = {
+        tinymce_api_key: localSettings.tinymce_api_key || data.tinymce_api_key || "",
+        last_model: localSettings.last_model || data.last_model || "gemini-2.5-flash",
+      };
+      
+      setTinymceKey(mergedSettings.tinymce_api_key);
+      
+      const savedModel = mergedSettings.last_model;
       if (["gemini-flash-latest", "gemini-2.0-flash", "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.5-pro", "gemini-3-pro-preview"].includes(savedModel)) {
         setLastModel(savedModel);
       } else {
