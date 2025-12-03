@@ -1,7 +1,12 @@
-// Client-side encrypted storage using LocalStorage
+// Hybrid Storage: Database or LocalStorage based on environment
 // Simple XOR encryption for demo - use stronger encryption in production
 
 const ENCRYPTION_KEY = "electronic-sheet-2025-key";
+
+// Check if we should use database or localStorage
+export const USE_DATABASE = typeof window === 'undefined' 
+  ? (process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('file:./dev.db'))
+  : false; // Client-side always uses localStorage for now
 
 function xorEncrypt(text: string): string {
   let result = "";

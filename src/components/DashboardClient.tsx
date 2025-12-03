@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import NewDocumentModal from "./NewDocumentModal";
-import { DocumentManager } from "@/lib/documentManager";
-import { FileManager } from "@/lib/fileManager";
+import { HybridStorage } from "@/lib/hybridStorage";
 
 const statusColors: Record<string, string> = {
   draft: "bg-gray-100 text-gray-700",
@@ -31,7 +30,11 @@ const formatDate = (date: Date | string) => {
   });
 };
 
-export default function DashboardClient() {
+interface DashboardClientProps {
+  initialStats?: any;
+}
+
+export default function DashboardClient({ initialStats }: DashboardClientProps) {
   const [showModal, setShowModal] = useState(false);
   const [stats, setStats] = useState({
     totalDocuments: 0,
@@ -43,19 +46,35 @@ export default function DashboardClient() {
   });
 
   useEffect(() => {
-    // Load stats from LocalStorage
-    const docStats = DocumentManager.getStats();
-    const fileStats = FileManager.getStats();
+    // If we have initial stats from server, use them
+    if (initialStats) {
+      setStats(initialStats);
+      return;
+    }
     
-    setStats({
-      totalDocuments: docStats.totalDocuments,
-      draftCount: docStats.draftCount,
-      inProgressCount: docStats.inProgressCount,
-      completedCount: docStats.completedCount,
-      totalFiles: fileStats.totalFiles,
-      recentDocuments: docStats.recentDocuments,
-    });
-  }, []);
+    // Otherwise load from Hybrid Storage (Database or LocalStorage)
+    const loadStats = async () => {
+      try {
+        const statsData = await HybridStorage.getStats();
+        // Ensure totalFiles is included and convert recentDocuments to correct type
+        const fullStats = {
+          totalFiles: 0,
+          ...statsData,
+          recentDocuments: (statsData.recentDocuments || []).map(doc => ({
+            id: doc.id.toString(),
+            title: doc.title,
+            status: doc.status,
+            updatedAt: doc.updatedAt instanceof Date ? doc.updatedAt.toISOString() : doc.updatedAt,
+          })),
+        };
+        setStats(fullStats);
+      } catch (error) {
+        console.error("Failed to load stats:", error);
+      }
+    };
+    
+    loadStats();
+  }, [initialStats]);
 
   return (
     <>
