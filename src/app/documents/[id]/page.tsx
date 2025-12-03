@@ -133,7 +133,7 @@ export default function DocumentEditorPage({ params }: { params: Promise<{ id: s
       // Merge both, with LocalStorage taking priority
       const mergedSettings = {
         tinymce_api_key: localSettings.tinymce_api_key || data.tinymce_api_key || "",
-        last_model: localSettings.last_model || data.last_model || "gemini-2.5-flash",
+        last_model: localSettings.last_model || (data as any).last_model || "gemini-2.5-flash",
       };
       
       setTinymceKey(mergedSettings.tinymce_api_key);

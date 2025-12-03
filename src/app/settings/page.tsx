@@ -38,7 +38,7 @@ export default function SettingsPage() {
       const mergedSettings = {
         gemini_api_key: localSettings.gemini_api_key || data.gemini_api_key || "",
         tinymce_api_key: localSettings.tinymce_api_key || data.tinymce_api_key || "",
-        last_model: localSettings.last_model || data.last_model || "gemini-2.5-flash",
+        last_model: localSettings.last_model || (data as any).last_model || "gemini-2.5-flash",
       };
       
       const savedModel = mergedSettings.last_model;

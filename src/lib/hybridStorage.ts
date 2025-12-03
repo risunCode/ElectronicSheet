@@ -1,6 +1,7 @@
 import { USE_DATABASE } from "./storage";
 import { DocumentManager } from "./documentManager";
 import { FileManager } from "./fileManager";
+import { storage } from "./storage";
 import prisma from "./prisma";
 
 // Hybrid Storage - switches between Database and LocalStorage
@@ -166,6 +167,9 @@ export class HybridStorage {
 
   // Settings
   static async getSettings() {
+    // Always start with LocalStorage for client-side persistence
+    const localSettings = storage.getSettings();
+    
     if (USE_DATABASE && prisma) {
       try {
         const settings = await prisma.setting.findMany();
@@ -187,12 +191,19 @@ export class HybridStorage {
           result[setting.key] = setting.value;
         }
 
-        return result;
+        // LocalStorage takes priority
+        return { ...result, ...localSettings };
       } catch {
-        return { gemini_api_key: process.env.GEMINI_API_KEY || "", tinymce_api_key: process.env.TINYMCE_API_KEY || "" };
+        return { ...localSettings, gemini_api_key: process.env.GEMINI_API_KEY || "", tinymce_api_key: process.env.TINYMCE_API_KEY || "" };
       }
     }
-    return { gemini_api_key: process.env.GEMINI_API_KEY || "", tinymce_api_key: process.env.TINYMCE_API_KEY || "" };
+    
+    // LocalStorage mode - return LocalStorage with env defaults
+    return { 
+      ...localSettings, 
+      gemini_api_key: process.env.GEMINI_API_KEY || "", 
+      tinymce_api_key: process.env.TINYMCE_API_KEY || "" 
+    };
   }
 
   static async saveSetting(key: string, value: string) {
