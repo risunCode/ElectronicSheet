@@ -52,7 +52,7 @@ export default function DashboardClient({ initialStats }: DashboardClientProps) 
       return;
     }
     
-    // Otherwise load from Hybrid Storage (Database or LocalStorage)
+    // Load stats and set up periodic refresh
     const loadStats = async () => {
       try {
         const statsData = await HybridStorage.getStats();
@@ -74,6 +74,11 @@ export default function DashboardClient({ initialStats }: DashboardClientProps) 
     };
     
     loadStats();
+    
+    // Set up periodic refresh for LocalStorage changes
+    const interval = setInterval(loadStats, 2000); // Refresh every 2 seconds
+    
+    return () => clearInterval(interval);
   }, [initialStats]);
 
   return (

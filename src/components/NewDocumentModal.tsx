@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
+import { HybridStorage } from "@/lib/hybridStorage";
 
 interface Template {
   id: number;
@@ -67,18 +68,13 @@ export default function NewDocumentModal({ isOpen, onClose }: NewDocumentModalPr
 
     setLoading(true);
     try {
-      const res = await fetch("/api/documents", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...form,
-          templateId: form.templateId ? parseInt(form.templateId) : null,
-        }),
+      // Create document using HybridStorage
+      const doc = await HybridStorage.createDocument({
+        title: form.title,
+        description: form.description,
+        type: form.type,
       });
 
-      if (!res.ok) throw new Error("Failed to create document");
-
-      const doc = await res.json();
       onClose();
       router.push(`/documents/${doc.id}`);
     } catch (error) {
