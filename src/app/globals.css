@@ -1,0 +1,220 @@
+@import "tailwindcss";
+@import "@fortawesome/fontawesome-free/css/all.min.css";
+
+/* Light theme (default) */
+:root {
+  --background: #f9fafb;
+  --foreground: #374151;
+  --primary: #6b7280;
+  --primary-hover: #4b5563;
+  --secondary: #9ca3af;
+  --success: #059669;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --border: #e5e7eb;
+  --card: #ffffff;
+  --sidebar-width-expanded: 13rem;
+  --sidebar-width-collapsed: 3.5rem;
+  --header-height: 3rem;
+  --accent: #6366f1;
+}
+
+/* Dark theme */
+html.dark {
+  --background: #111827;
+  --foreground: #e5e7eb;
+  --primary: #9ca3af;
+  --primary-hover: #d1d5db;
+  --secondary: #6b7280;
+  --border: #374151;
+  --card: #1f2937;
+  --accent: #818cf8;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 16px; /* Base font size normalization */
+}
+
+/* Main content container - add max width for better readability */
+.main-content {
+  max-width: 1400px; /* Limit overall width */
+  margin-left: var(--sidebar-width-expanded);
+  margin-right: auto;
+  padding-top: var(--header-height);
+  min-height: 100vh;
+  transition: margin-left 0.3s ease-in-out;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--secondary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Button base */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem; /* Slightly larger padding */
+  font-size: 0.95rem; /* Larger font size */
+  font-weight: 500;
+  border-radius: 0.375rem;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+}
+
+.btn-secondary {
+  background: var(--secondary);
+  color: white;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: white;
+}
+
+.btn-success {
+  background: var(--success);
+  color: white;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--foreground);
+}
+
+.btn-outline:hover {
+  background: var(--border);
+}
+
+/* Card */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+html.dark .card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Input */
+.input {
+  width: 100%;
+  padding: 0.65rem 0.85rem; /* Larger padding */
+  font-size: 0.95rem; /* Larger font size */
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--card);
+  color: var(--foreground);
+  transition: border-color 0.15s ease;
+}
+
+.input:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.modal-content {
+  background: var(--card);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  max-width: 32rem;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Remove this duplicate - already defined above */
+
+/* When sidebar is collapsed */
+body.sidebar-collapsed .main-content {
+  margin-left: var(--sidebar-width-collapsed);
+}
+
+/* Header */
+.app-header {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-width-expanded);
+  right: 0;
+  max-width: calc(1400px - var(--sidebar-width-expanded)); /* Limit header width */
+  height: var(--header-height);
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Changed from flex-end */
+  padding: 0 1.5rem; /* Increased padding */
+  z-index: 30;
+  transition: left 0.3s ease-in-out;
+}
+
+body.sidebar-collapsed .app-header {
+  left: var(--sidebar-width-collapsed);
+  max-width: calc(1400px - var(--sidebar-width-collapsed)); /* Adjust for collapsed sidebar */
+}
+
+/* Sidebar section */
+.sidebar-section {
+  padding: 0.5rem 0.75rem;
+}
+
+.sidebar-section-title {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--secondary);
+  padding: 0 0.75rem;
+  margin-bottom: 0.25rem;
+}

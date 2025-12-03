@@ -1,0 +1,93 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// App Settings (API keys, last model, etc.)
+model Setting {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Document Templates
+model Template {
+  id          Int        @id @default(autoincrement())
+  name        String
+  slug        String     @unique
+  description String?
+  type        String     @default("blank") // docx, xlsx, pdf, blank
+  thumbnail   String?
+  content     String?    // JSON string
+  isSystem    Boolean    @default(false)
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  documents   Document[]
+}
+
+// Documents
+model Document {
+  id              Int       @id @default(autoincrement())
+  uuid            String    @unique @default(uuid())
+  title           String
+  description     String?
+  type            String    @default("docx") // docx, xlsx, pptx, pdf
+  status          String    @default("draft") // draft, in_progress, under_review, completed, archived
+  storagePath     String?
+  pageSize        String    @default("a4") // a4, f4, legal, letter
+  pageOrientation String    @default("portrait") // portrait, landscape
+  content         String?   // HTML content
+  wordCount       Int       @default(0)
+  pageCount       Int       @default(1)
+  templateId      Int?
+  template        Template? @relation(fields: [templateId], references: [id])
+  lastEditedAt    DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// Folders for File Manager
+model Folder {
+  id        Int      @id @default(autoincrement())
+  name      String
+  slug      String
+  parentId  Int?
+  parent    Folder?  @relation("FolderToFolder", fields: [parentId], references: [id])
+  children  Folder[] @relation("FolderToFolder")
+  color     String   @default("#6366f1")
+  path      String
+  files     File[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Files for File Manager
+model File {
+  id            Int      @id @default(autoincrement())
+  uuid          String   @unique @default(uuid())
+  name          String
+  originalName  String
+  extension     String
+  mimeType      String
+  size          Int      @default(0)
+  path          String
+  disk          String   @default("local")
+  folderId      Int?
+  folder        Folder?  @relation(fields: [folderId], references: [id])
+  thumbnailPath String?
+  metadata      String?  // JSON string
+  lastAccessedAt DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
