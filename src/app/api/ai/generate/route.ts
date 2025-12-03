@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { getGeminiApiKey, setLastModel } from "@/lib/settings";
+import { HybridStorage } from "@/lib/hybridStorage";
+import { storage } from "@/lib/storage";
 
 type AIAction = "write" | "continue" | "improve" | "summarize" | "translate" | "expand" | "knowledge";
 
@@ -169,7 +170,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Action and content are required" }, { status: 400 });
     }
 
-    const apiKey = await getGeminiApiKey();
+    // Get API key from LocalStorage/Database
+    const settings = await HybridStorage.getSettings();
+    const localSettings = storage.getSettings();
+    
+    const apiKey = localSettings.gemini_api_key || settings.gemini_api_key;
     if (!apiKey) {
       return NextResponse.json({ 
         error: "Gemini API key not configured. Please add it in Settings." 
@@ -189,8 +194,9 @@ export async function POST(request: Request) {
       prompt = getPrompt(action as AIAction, content, language);
     }
 
-    // Save last used model
-    await setLastModel(selectedModel);
+    // Save last used model to LocalStorage
+    storage.saveSetting("last_model", selectedModel);
+    await HybridStorage.saveSetting("last_model", selectedModel);
 
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent`;
 
