@@ -129,7 +129,7 @@ export default function SettingsPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-semibold">Settings</h1>
-          <p className="text-[var(--secondary)] mt-1">Configure API keys and preferences</p>
+          <p className="text-[var(--secondary)] mt-1">Konfigurasi API keys dan pengaturan aplikasi</p>
         </div>
         <button
           onClick={handleSaveAll}

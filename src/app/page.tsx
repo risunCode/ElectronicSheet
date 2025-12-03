@@ -35,7 +35,7 @@ export default async function Dashboard() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-semibold">Dashboard</h1>
-        <p className="text-[var(--secondary)] mt-1">Overview of your documents and files</p>
+        <p className="text-[var(--secondary)] mt-1">Kelola dokumen dan file Anda dengan mudah menggunakan AI assistant</p>
       </div>
 
       {/* Stats Grid */}

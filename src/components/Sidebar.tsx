@@ -59,14 +59,14 @@ export default function Sidebar() {
         fixed left-0 top-0 h-screen z-40 flex flex-col
         bg-[var(--card)] border-r border-[var(--border)]
         transition-all duration-300 ease-in-out
-        ${isExpanded ? "w-52" : "w-14"}
+        ${isExpanded ? "w-56" : "w-14"}
       `}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Logo */}
-      <div className="h-12 flex items-center px-3 border-b border-[var(--border)]">
-        <Link href="/" className="flex items-center gap-2 overflow-hidden">
+      <div className="h-14 flex items-center px-3 border-b border-[var(--border)]">
+        <Link href="/" className="flex items-center gap-2.5 overflow-hidden">
           <i className="fa-solid fa-file-signature text-lg text-[var(--accent)] flex-shrink-0"></i>
           <span className={`font-semibold text-sm whitespace-nowrap transition-opacity duration-300 ${isExpanded ? "opacity-100" : "opacity-0"}`}>
             ElectronicSheet
@@ -81,7 +81,7 @@ export default function Sidebar() {
             {isExpanded && (
               <div className="sidebar-section-title">{section.title}</div>
             )}
-            <ul className="space-y-0.5 px-2">
+            <ul className="space-y-0.5 px-2.5">
               {section.items.map((item) => {
                 const isActive = pathname === item.href || 
                   (item.href !== "/" && pathname.startsWith(item.href));
@@ -91,11 +91,10 @@ export default function Sidebar() {
                     <Link
                       href={item.href}
                       className={`
-                        flex items-center gap-2.5 px-2.5 py-2 rounded-md transition-colors text-sm
+                        flex items-center gap-2.5 px-3 py-2 rounded-md transition-colors text-sm
                         ${isActive 
                           ? "bg-[var(--border)] text-[var(--foreground)] font-medium" 
-                          : "text-[var(--secondary)] hover:bg-[var(--border)] hover:text-[var(--foreground)]"
-                        }
+                          : "text-[var(--secondary)] hover:bg-[var(--border)] hover:text-[var(--foreground)]"}
                       `}
                       title={!isExpanded ? item.label : undefined}
                     >
@@ -116,7 +115,7 @@ export default function Sidebar() {
       <div className="border-t border-[var(--border)] p-2">
         <button
           onClick={togglePin}
-          className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[var(--secondary)] hover:bg-[var(--border)] hover:text-[var(--foreground)] transition-colors text-sm"
+          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-[var(--secondary)] hover:bg-[var(--border)] hover:text-[var(--foreground)] transition-colors text-sm"
           title={!isExpanded ? (isPinned ? "Unpin" : "Pin") : undefined}
         >
           <i className={`fa-solid ${isPinned ? "fa-thumbtack" : "fa-thumbtack fa-rotate-90"} w-4 text-center flex-shrink-0 text-xs`}></i>

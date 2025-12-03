@@ -23,6 +23,23 @@ const statusColors: Record<string, string> = {
   archived: "bg-red-100 text-red-700",
 };
 
+const statusLabels: Record<string, string> = {
+  draft: "Draft",
+  in_progress: "In progress",
+  under_review: "Under review",
+  completed: "Completed",
+  archived: "Archived",
+};
+
+const formatDate = (date: Date | string) => {
+  const d = new Date(date);
+  return d.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
 export default function DashboardClient({ recentDocuments }: DashboardClientProps) {
   const [showModal, setShowModal] = useState(false);
 
@@ -81,16 +98,19 @@ export default function DashboardClient({ recentDocuments }: DashboardClientProp
                   className="flex items-center justify-between p-3 rounded-lg hover:bg-[var(--border)] transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <i className="fa-solid fa-file-lines text-[var(--accent)]"></i>
+                    <div className="flex items-center justify-center w-9 h-9 rounded-md bg-[var(--border)]">
+                      <i className="fa-solid fa-file-lines text-[var(--accent)]"></i>
+                    </div>
                     <div>
                       <p className="font-medium">{doc.title}</p>
-                      <p className="text-sm text-[var(--secondary)]">
-                        {new Date(doc.updatedAt).toLocaleDateString()}
-                      </p>
+                      <div className="flex items-center gap-2 text-xs text-[var(--secondary)] mt-0.5">
+                        <i className="fa-solid fa-calendar-day"></i>
+                        <span>{formatDate(doc.updatedAt)}</span>
+                      </div>
                     </div>
                   </div>
                   <span className={`text-xs px-2 py-1 rounded-full ${statusColors[doc.status] || ""}`}>
-                    {doc.status.replace("_", " ")}
+                    {statusLabels[doc.status] || doc.status.replace("_", " ")}
                   </span>
                 </Link>
               ))}

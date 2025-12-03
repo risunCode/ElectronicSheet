@@ -237,7 +237,7 @@ export default function FileManagerPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-semibold">File Manager</h1>
-          <p className="text-[var(--secondary)] mt-1">Manage your files and folders</p>
+          <p className="text-[var(--secondary)] mt-1">Kelola file dan folder dengan drag & drop, organisasi mudah</p>
         </div>
         <div className="flex items-center gap-2">
           <input

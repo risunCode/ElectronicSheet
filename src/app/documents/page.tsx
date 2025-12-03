@@ -100,7 +100,7 @@ export default function DocumentsPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-semibold">Documents</h1>
-          <p className="text-[var(--secondary)] mt-1">Manage your documents</p>
+          <p className="text-[var(--secondary)] mt-1">Kelola semua dokumen Anda dengan fitur AI writing assistant</p>
         </div>
         <button onClick={() => setShowModal(true)} className="btn btn-primary">
           <i className="fa-solid fa-plus"></i>
