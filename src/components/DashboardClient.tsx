@@ -1,19 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import NewDocumentModal from "./NewDocumentModal";
-
-interface RecentDoc {
-  id: number;
-  title: string;
-  status: string;
-  updatedAt: Date;
-}
-
-interface DashboardClientProps {
-  recentDocuments: RecentDoc[];
-}
+import { DocumentManager } from "@/lib/documentManager";
+import { FileManager } from "@/lib/fileManager";
 
 const statusColors: Record<string, string> = {
   draft: "bg-gray-100 text-gray-700",
@@ -40,11 +31,99 @@ const formatDate = (date: Date | string) => {
   });
 };
 
-export default function DashboardClient({ recentDocuments }: DashboardClientProps) {
+export default function DashboardClient() {
   const [showModal, setShowModal] = useState(false);
+  const [stats, setStats] = useState({
+    totalDocuments: 0,
+    draftCount: 0,
+    inProgressCount: 0,
+    completedCount: 0,
+    totalFiles: 0,
+    recentDocuments: [] as Array<{id: string; title: string; status: string; updatedAt: string}>,
+  });
+
+  useEffect(() => {
+    // Load stats from LocalStorage
+    const docStats = DocumentManager.getStats();
+    const fileStats = FileManager.getStats();
+    
+    setStats({
+      totalDocuments: docStats.totalDocuments,
+      draftCount: docStats.draftCount,
+      inProgressCount: docStats.inProgressCount,
+      completedCount: docStats.completedCount,
+      totalFiles: fileStats.totalFiles,
+      recentDocuments: docStats.recentDocuments,
+    });
+  }, []);
 
   return (
     <>
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold">Dashboard</h1>
+        <p className="text-[var(--secondary)] mt-1">Kelola dokumen dan file Anda dengan mudah menggunakan AI assistant</p>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+        <div className="card">
+          <div className="flex items-center gap-4">
+            <div className="text-2xl text-blue-500">
+              <i className="fa-solid fa-file-lines"></i>
+            </div>
+            <div>
+              <p className="text-sm text-[var(--secondary)]">Total Documents</p>
+              <p className="text-2xl font-bold">{stats.totalDocuments}</p>
+            </div>
+          </div>
+        </div>
+        <div className="card">
+          <div className="flex items-center gap-4">
+            <div className="text-2xl text-gray-500">
+              <i className="fa-solid fa-file-pen"></i>
+            </div>
+            <div>
+              <p className="text-sm text-[var(--secondary)]">Draft</p>
+              <p className="text-2xl font-bold">{stats.draftCount}</p>
+            </div>
+          </div>
+        </div>
+        <div className="card">
+          <div className="flex items-center gap-4">
+            <div className="text-2xl text-yellow-500">
+              <i className="fa-solid fa-clock"></i>
+            </div>
+            <div>
+              <p className="text-sm text-[var(--secondary)]">In Progress</p>
+              <p className="text-2xl font-bold">{stats.inProgressCount}</p>
+            </div>
+          </div>
+        </div>
+        <div className="card">
+          <div className="flex items-center gap-4">
+            <div className="text-2xl text-green-500">
+              <i className="fa-solid fa-circle-check"></i>
+            </div>
+            <div>
+              <p className="text-sm text-[var(--secondary)]">Completed</p>
+              <p className="text-2xl font-bold">{stats.completedCount}</p>
+            </div>
+          </div>
+        </div>
+        <div className="card">
+          <div className="flex items-center gap-4">
+            <div className="text-2xl text-purple-500">
+              <i className="fa-solid fa-folder-open"></i>
+            </div>
+            <div>
+              <p className="text-sm text-[var(--secondary)]">Total Files</p>
+              <p className="text-2xl font-bold">{stats.totalFiles}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Quick Actions */}
         <div className="card">
@@ -81,7 +160,7 @@ export default function DashboardClient({ recentDocuments }: DashboardClientProp
             </Link>
           </div>
           
-          {recentDocuments.length === 0 ? (
+          {stats.recentDocuments.length === 0 ? (
             <div className="text-center py-12 text-[var(--secondary)]">
               <i className="fa-solid fa-file-circle-plus text-4xl mb-3"></i>
               <p className="mb-4">No documents yet</p>
@@ -91,7 +170,7 @@ export default function DashboardClient({ recentDocuments }: DashboardClientProp
             </div>
           ) : (
             <div className="space-y-2">
-              {recentDocuments.map((doc) => (
+              {stats.recentDocuments.map((doc) => (
                 <Link
                   key={doc.id}
                   href={`/documents/${doc.id}`}
