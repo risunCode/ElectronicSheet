@@ -1,78 +1,30 @@
 import { NextResponse } from "next/server";
-import { readdir, stat, mkdir, writeFile } from "fs/promises";
-import { existsSync } from "fs";
-import path from "path";
-import prisma from "@/lib/prisma";
-
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
-
-// Ensure upload directory exists
-async function ensureUploadDir(subPath: string = "") {
-  const fullPath = path.join(UPLOAD_DIR, subPath);
-  if (!existsSync(fullPath)) {
-    await mkdir(fullPath, { recursive: true });
-  }
-  return fullPath;
-}
+import { HybridStorage } from "@/lib/hybridStorage";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const currentPath = searchParams.get("path") || "";
     
-    const fullPath = await ensureUploadDir(currentPath);
-    const items: Array<{
-      name: string;
-      type: "file" | "directory";
-      path: string;
-      size: number | null;
-      modified: number;
-      extension?: string;
-      mimeType?: string;
-    }> = [];
+    // Get files from HybridStorage
+    const files = await HybridStorage.getFiles();
+    
+    // Filter by current path
+    const filteredFiles = files.filter(file => file.path === currentPath);
+    
+    // Convert to expected format
+    const items = filteredFiles.map(file => ({
+      name: file.name,
+      type: "file" as const,
+      path: file.path,
+      size: file.size,
+      modified: Math.floor(new Date(file.updatedAt).getTime() / 1000),
+      extension: file.name.split('.').pop()?.toLowerCase(),
+      mimeType: (file as any).type || (file as any).mimeType || "application/octet-stream",
+    }));
 
-    const entries = await readdir(fullPath, { withFileTypes: true });
-
-    for (const entry of entries) {
-      const entryPath = path.join(fullPath, entry.name);
-      const stats = await stat(entryPath);
-      const relativePath = currentPath ? `${currentPath}/${entry.name}` : entry.name;
-
-      if (entry.isDirectory()) {
-        items.push({
-          name: entry.name,
-          type: "directory",
-          path: relativePath,
-          size: null,
-          modified: Math.floor(stats.mtimeMs / 1000),
-        });
-      } else {
-        const ext = path.extname(entry.name).slice(1).toLowerCase();
-        items.push({
-          name: entry.name,
-          type: "file",
-          path: relativePath,
-          size: stats.size,
-          modified: Math.floor(stats.mtimeMs / 1000),
-          extension: ext,
-          mimeType: getMimeType(ext),
-        });
-
-        // Update last accessed in database
-        if (prisma) {
-          await prisma.file.updateMany({
-            where: { path: relativePath },
-            data: { lastAccessedAt: new Date() },
-          });
-        }
-      }
-    }
-
-    // Sort: directories first, then files
-    items.sort((a, b) => {
-      if (a.type !== b.type) return a.type === "directory" ? -1 : 1;
-      return a.name.localeCompare(b.name);
-    });
+    // Sort files by name
+    items.sort((a, b) => a.name.localeCompare(b.name));
 
     // Build breadcrumbs
     const breadcrumbs = [{ name: "Home", path: "" }];
@@ -90,8 +42,8 @@ export async function GET(request: Request) {
       path: currentPath,
       breadcrumbs,
       stats: {
-        totalFiles: items.filter(i => i.type === "file").length,
-        totalDirectories: items.filter(i => i.type === "directory").length,
+        totalFiles: items.length,
+        totalDirectories: 0, // No directories in LocalStorage mode
         totalSize: items.reduce((sum, i) => sum + (i.size || 0), 0),
       },
     });
@@ -107,51 +59,34 @@ export async function POST(request: Request) {
     const files = formData.getAll("files") as File[];
     const currentPath = (formData.get("path") as string) || "";
 
-    const targetDir = await ensureUploadDir(currentPath);
     const uploaded: Array<{ name: string; size: number; path: string }> = [];
 
     for (const file of files) {
       const buffer = Buffer.from(await file.arrayBuffer());
-      let filename = sanitizeFilename(file.name);
-      let targetPath = path.join(targetDir, filename);
-
-      // Handle duplicates
-      let counter = 1;
-      while (existsSync(targetPath)) {
-        const ext = path.extname(filename);
-        const base = path.basename(filename, ext);
-        filename = `${base}_${counter}${ext}`;
-        targetPath = path.join(targetDir, filename);
-        counter++;
-      }
-
-      await writeFile(targetPath, buffer);
-
+      const filename = file.name;
       const relativePath = currentPath ? `${currentPath}/${filename}` : filename;
       
-      // Save to database
-      if (prisma) {
-        await prisma.file.create({
-          data: {
-            name: filename,
-            originalName: file.name,
-            extension: path.extname(filename).slice(1).toLowerCase(),
-            mimeType: file.type || "application/octet-stream",
-            size: file.size,
-            path: relativePath,
-            disk: "local",
-          },
+      // Create File object for HybridStorage
+      const fileObj = new File([buffer], filename, { 
+        type: file.type || "application/octet-stream" 
+      });
+      
+      // Save to HybridStorage
+      const savedFile = await HybridStorage.uploadFile(fileObj, currentPath);
+
+      if (savedFile) {
+        uploaded.push({
+          name: filename,
+          size: file.size,
+          path: relativePath,
         });
       }
-
-      uploaded.push({
-        name: filename,
-        size: file.size,
-        path: relativePath,
-      });
     }
 
-    return NextResponse.json({ uploaded });
+    return NextResponse.json({
+      success: true,
+      uploaded,
+    });
   } catch (error) {
     console.error("Error uploading files:", error);
     return NextResponse.json({ error: "Failed to upload files" }, { status: 500 });
